@@ -101,4 +101,23 @@ contract FundMeTest is Test {
         assert(address(fundMe).balance == 0);
         assert(startingFundMeBalance + startingOwnerBalance == fundMe.getOwner().balance);
     }
+
+    function testWithdrawFromMultipleFundersCheaper() public funded {
+        uint160 funderCount = 0;
+        uint160 startingFunderIndex = 1;
+        for (uint160 i = startingFunderIndex; i < funderCount; i++) {
+            hoax(address(i), SEND_VALUE);
+            fundMe.fund{value: SEND_VALUE}();
+        }
+
+        uint256 startingOwnerBalance = fundMe.getOwner().balance;
+        uint256 startingFundMeBalance = address(fundMe).balance;
+
+        vm.startPrank(fundMe.getOwner());
+        fundMe.cheaperWithdraw();
+        vm.stopPrank();
+
+        assert(address(fundMe).balance == 0);
+        assert(startingFundMeBalance + startingOwnerBalance == fundMe.getOwner().balance);
+    }
 }
